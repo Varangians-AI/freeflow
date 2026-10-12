@@ -7,8 +7,20 @@ public struct ModelConfig {
     public let shouldStripThinkTags: Bool
 }
 
+/// Out-of-the-box provider for the Varangians fork: one OpenRouter key covers
+/// transcription and cleanup. Stored user settings always override these.
+public enum ProviderDefaults {
+    public static let apiBaseURL = "https://openrouter.ai/api/v1"
+    public static let transcriptionModel = "openai/whisper-large-v3-turbo"
+    public static let postProcessingModel = "google/gemini-3.1-flash-lite"
+    public static let postProcessingFallbackModel = "google/gemini-2.5-flash-lite"
+    public static let contextModel = "google/gemini-3.1-flash-lite"
+}
+
 public struct ModelConfiguration {
     public static let llmModels = [
+        ProviderDefaults.postProcessingModel,
+        ProviderDefaults.postProcessingFallbackModel,
         "openai/gpt-oss-20b",
         "openai/gpt-oss-120b",
         "openai/gpt-oss-safeguard-20b",
@@ -19,10 +31,12 @@ public struct ModelConfiguration {
 
     /// Models that accept image input. The context model must support vision for screenshot analysis to work.
     public static let visionModels = [
+        ProviderDefaults.contextModel,
         "qwen/qwen3.8-27b"
     ]
 
     public static let transcriptionModels = [
+        ProviderDefaults.transcriptionModel,
         "whisper-large-v3",
         "whisper-large-v3-turbo"
     ]

@@ -8,6 +8,7 @@ enum PostProcessingServiceTests {
         testCustomPromptKeepsDirective()
         testFallbackModelReceivesSameDirective()
         testEnglishRequestIsUnchanged()
+        testDefaultModelSendsNoReasoningEffort()
     }
 
     private static let directive = "The dictation is primarily in Russian"
@@ -160,5 +161,33 @@ enum PostProcessingServiceTests {
         }
         done.wait()
         return recorder.captured
+    }
+
+    private static func testDefaultModelSendsNoReasoningEffort() {
+        final class Box: @unchecked Sendable { var json: [String: Any] = [:] }
+        let box = Box()
+        let service = PostProcessingService(
+            apiKey: "synthetic-key",
+            baseURL: "https://example.invalid/v1",
+            transport: { request in
+                box.json = (try? JSONSerialization.jsonObject(with: request.httpBody ?? Data())) as? [String: Any] ?? [:]
+                let body = try JSONSerialization.data(withJSONObject: ["choices": [["message": ["content": "Synthetic."]]]])
+                return (body, HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+            }
+        )
+        let context = AppContext(appName: nil, bundleIdentifier: nil, windowTitle: nil, selectedText: nil,
+                                 currentActivity: "", contextSystemPrompt: nil, contextPrompt: nil,
+                                 screenshotDataURL: nil, screenshotMimeType: nil, screenshotError: nil)
+        let done = DispatchSemaphore(value: 0)
+        Task {
+            _ = try? await service.postProcess(transcript: "synthetic transcript", context: context,
+                                               customVocabulary: "", dictationLanguage: "")
+            done.signal()
+        }
+        done.wait()
+        TestSupport.expectEqual(box.json["model"] as? String, ProviderDefaults.postProcessingModel)
+        TestSupport.expect(box.json["reasoning_effort"] == nil, "default cleanup model must not get reasoning_effort")
+        TestSupport.expect(box.json["max_completion_tokens"] == nil, "default cleanup model must not get gpt-oss token cap")
+        TestSupport.expect(box.json["include_reasoning"] == nil, "default cleanup model must not get include_reasoning")
     }
 }

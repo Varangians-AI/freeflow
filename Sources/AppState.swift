@@ -242,7 +242,7 @@ final class AppState: ObservableObject, @unchecked Sendable {
     let maxPipelineHistoryCount = 20
     static let defaultContextScreenshotMaxDimension = Int(AppContextService.defaultScreenshotMaxDimension)
     static let contextScreenshotDimensionOptions = [1024, 768, 640, 512]
-    static let defaultTranscriptionModel = "whisper-large-v3"
+    static let defaultTranscriptionModel = ProviderDefaults.transcriptionModel
     static let transcriptionLanguageOptions: [(code: String, name: String)] = [
         ("", "Auto-detect"),
         ("en", "English"),
@@ -275,9 +275,9 @@ final class AppState: ObservableObject, @unchecked Sendable {
         ("hu", "Hungarian"),
         ("ca", "Catalan")
     ]
-    static let defaultPostProcessingModel = "openai/gpt-oss-20b"
-    static let defaultPostProcessingFallbackModel = "qwen/qwen3.8-27b"
-    static let defaultContextModel = "qwen/qwen3.8-27b"
+    static let defaultPostProcessingModel = ProviderDefaults.postProcessingModel
+    static let defaultPostProcessingFallbackModel = ProviderDefaults.postProcessingFallbackModel
+    static let defaultContextModel = ProviderDefaults.contextModel
     private static let deprecatedDefaultPostProcessingFallbackModel = "meta-llama/llama-4-scout-17b-16e-instruct"
     private static let deprecatedDefaultContextModel = "meta-llama/llama-4-scout-17b-16e-instruct"
     private static let trailingPressEnterCommandPattern = try! NSRegularExpression(
@@ -857,7 +857,7 @@ final class AppState: ObservableObject, @unchecked Sendable {
         }
     }
 
-    static let defaultAPIBaseURL = "https://api.groq.com/openai/v1"
+    static let defaultAPIBaseURL = ProviderDefaults.apiBaseURL
 
     private struct StoredShortcutConfiguration {
         let hold: ShortcutBinding
