@@ -25,6 +25,14 @@
 
 ## Overview
 
+> **Varangians fork:** defaults to [OpenRouter](https://openrouter.ai) — one key covers transcription
+> (`openai/whisper-large-v3-turbo`) and cleanup (`google/gemini-3.1-flash-lite`, fallback
+> `google/gemini-2.5-flash-lite`). Any value you set in Settings overrides these. Offline fallback:
+> run a local whisper.cpp server with `tools/local-stt/run-whisper-server.sh` and set the
+> Transcription API URL to `http://127.0.0.1:8178/v1`. Build without a signing identity:
+> `make CODESIGN_IDENTITY=-`.
+
+
 FreeFlow is a free Mac dictation app inspired by [Wispr Flow](https://wisprflow.ai/), [Superwhisper](https://superwhisper.com/), and [Monologue](https://www.monologue.to/). It gives you fast AI transcription, context-aware cleanup, and voice-driven text editing without a monthly subscription.
 
 ## Quick Start

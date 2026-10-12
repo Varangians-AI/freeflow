@@ -7,6 +7,8 @@ enum ModelConfigurationTests {
         testModelListsAreConsistent()
         testThinkTagStripping()
         testGroqSelectionMigration()
+        testOpenRouterProviderDefaults()
+        testDefaultTranscriptionModelKeepsSegmentMetadata()
     }
 
     private static func testProviderlessAliasesMatchCanonicalModels() {
@@ -97,5 +99,34 @@ enum ModelConfigurationTests {
         TestSupport.expectEqual(aliasConfig.reasoningEffort, canonicalConfig.reasoningEffort)
         TestSupport.expectEqual(aliasConfig.includeReasoning, canonicalConfig.includeReasoning)
         TestSupport.expectEqual(aliasConfig.shouldStripThinkTags, canonicalConfig.shouldStripThinkTags)
+    }
+
+    private static func testOpenRouterProviderDefaults() {
+        TestSupport.expectEqual(ProviderDefaults.apiBaseURL, "https://openrouter.ai/api/v1")
+        TestSupport.expectEqual(ProviderDefaults.transcriptionModel, "openai/whisper-large-v3-turbo")
+        TestSupport.expectEqual(ProviderDefaults.postProcessingModel, "google/gemini-3.1-flash-lite")
+        TestSupport.expectEqual(ProviderDefaults.postProcessingFallbackModel, "google/gemini-2.5-flash-lite")
+        TestSupport.expectEqual(ProviderDefaults.contextModel, "google/gemini-3.1-flash-lite")
+
+        TestSupport.expect(ModelConfiguration.transcriptionModels.contains(ProviderDefaults.transcriptionModel), "default transcription model listed")
+        TestSupport.expect(ModelConfiguration.llmModels.contains(ProviderDefaults.postProcessingModel), "default cleanup model listed")
+        TestSupport.expect(ModelConfiguration.llmModels.contains(ProviderDefaults.postProcessingFallbackModel), "fallback cleanup model listed")
+        TestSupport.expect(ModelConfiguration.visionModels.contains(ProviderDefaults.contextModel), "context model must accept images")
+
+        // Gemini Flash Lite must not be sent gpt-oss reasoning knobs: they would turn on thinking and add latency.
+        for model in [ProviderDefaults.postProcessingModel, ProviderDefaults.postProcessingFallbackModel] {
+            let config = ModelConfiguration.config(for: model)
+            TestSupport.expectEqual(config.reasoningEffort, nil)
+            TestSupport.expectEqual(config.maxCompletionTokens, nil)
+            TestSupport.expectEqual(config.includeReasoning, nil)
+        }
+    }
+
+    // OpenRouter's whisper-large-v3-turbo returns verbose_json segments (verified live 2026-10-12);
+    // the hallucination filter needs them, so the default must request verbose_json.
+    private static func testDefaultTranscriptionModelKeepsSegmentMetadata() {
+        TestSupport.expectEqual(TranscriptionService.responseFormat(forModel: ProviderDefaults.transcriptionModel), "verbose_json")
+        TestSupport.expectEqual(TranscriptionService.responseFormat(forModel: "whisper-large-v3"), "verbose_json")
+        TestSupport.expectEqual(TranscriptionService.responseFormat(forModel: "gpt-4o-transcribe"), "json")
     }
 }

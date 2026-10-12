@@ -141,10 +141,8 @@ Behavior:
     private let preferredFallbackModel: String
     private let instructionExecutionGuardEnabled: Bool
     private let transport: Transport
-    private let defaultModel = "openai/gpt-oss-20b"
-    private let defaultFallbackModel = "qwen/qwen3.8-27b"
-    private let defaultModelReasoningEffort = "low"
-    private let postProcessingMaxCompletionTokens = 4096
+    private let defaultModel = ProviderDefaults.postProcessingModel
+    private let defaultFallbackModel = ProviderDefaults.postProcessingFallbackModel
     private var postProcessingTimeoutSeconds: TimeInterval {
         let override = UserDefaults.standard.double(forKey: "post_processing_timeout_seconds")
         return override > 0 ? override : 20
@@ -152,7 +150,7 @@ Behavior:
 
     init(
         apiKey: String,
-        baseURL: String = "https://api.groq.com/openai/v1",
+        baseURL: String = ProviderDefaults.apiBaseURL,
         preferredModel: String = "",
         preferredFallbackModel: String = "",
         instructionExecutionGuardEnabled: Bool = true,
@@ -550,18 +548,12 @@ Model: \(model)
         let config = ModelConfiguration.config(for: model)
         if let maxTokens = config.maxCompletionTokens {
             payload["max_completion_tokens"] = maxTokens
-        } else if model == defaultModel {
-            payload["max_completion_tokens"] = postProcessingMaxCompletionTokens
         }
         if let effort = config.reasoningEffort {
             payload["reasoning_effort"] = effort
-        } else if model == defaultModel {
-            payload["reasoning_effort"] = defaultModelReasoningEffort
         }
         if let include = config.includeReasoning {
             payload["include_reasoning"] = include
-        } else if model == defaultModel {
-            payload["include_reasoning"] = false
         }
 
         request.httpBody = try JSONSerialization.data(withJSONObject: payload, options: [])
@@ -690,18 +682,12 @@ Model: \(model)
         let config = ModelConfiguration.config(for: model)
         if let maxTokens = config.maxCompletionTokens {
             payload["max_completion_tokens"] = maxTokens
-        } else if model == defaultModel {
-            payload["max_completion_tokens"] = postProcessingMaxCompletionTokens
         }
         if let effort = config.reasoningEffort {
             payload["reasoning_effort"] = effort
-        } else if model == defaultModel {
-            payload["reasoning_effort"] = defaultModelReasoningEffort
         }
         if let include = config.includeReasoning {
             payload["include_reasoning"] = include
-        } else if model == defaultModel {
-            payload["include_reasoning"] = false
         }
 
         request.httpBody = try JSONSerialization.data(withJSONObject: payload, options: [])
@@ -877,18 +863,12 @@ Model: \(model)
         let config = ModelConfiguration.config(for: model)
         if let maxTokens = config.maxCompletionTokens {
             payload["max_completion_tokens"] = maxTokens
-        } else if model == defaultModel {
-            payload["max_completion_tokens"] = postProcessingMaxCompletionTokens
         }
         if let effort = config.reasoningEffort {
             payload["reasoning_effort"] = effort
-        } else if model == defaultModel {
-            payload["reasoning_effort"] = defaultModelReasoningEffort
         }
         if let include = config.includeReasoning {
             payload["include_reasoning"] = include
-        } else if model == defaultModel {
-            payload["include_reasoning"] = false
         }
 
         request.httpBody = try JSONSerialization.data(withJSONObject: payload, options: [])

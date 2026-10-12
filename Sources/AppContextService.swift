@@ -45,7 +45,7 @@ enum DesktopScreenshotFallbackPreference {
 }
 
 final class AppContextService {
-    static let defaultContextModel = "qwen/qwen3.8-27b"
+    static let defaultContextModel = ProviderDefaults.contextModel
     static let defaultContextPrompt = """
 You are a context synthesis assistant for a speech-to-text pipeline.
 Given app/window metadata and an optional screenshot, output exactly two sentences that describe what the user is doing right now and the likely writing intent in the current window.
@@ -71,7 +71,7 @@ Return only two sentences, no labels, no markdown, no extra commentary.
 
     init(
         apiKey: String,
-        baseURL: String = "https://api.groq.com/openai/v1",
+        baseURL: String = ProviderDefaults.apiBaseURL,
         customContextPrompt: String = "",
         contextModel: String = AppContextService.defaultContextModel,
         screenshotMaxDimension: CGFloat = AppContextService.defaultScreenshotMaxDimension,

@@ -24,6 +24,7 @@ TEST_PRODUCTION_SOURCES = \
 	Sources/RecordingTimerPreference.swift \
 	Sources/TranscriptionErrorPresentationCore.swift \
 	Sources/TranscriptTextCore.swift \
+	Sources/TranscriptionService.swift \
 	Sources/UpdateManager.swift \
 	Sources/ShortcutCore/DictationShortcutSessionController.swift \
 	Sources/ShortcutCore/ShortcutMatcher.swift \

@@ -11,7 +11,9 @@ class TranscriptionService {
         // Groq's hosted Whisper models support verbose_json and expose the
         // segment metadata used by the hallucination filter below.
         "whisper-large-v3",
-        "whisper-large-v3-turbo"
+        "whisper-large-v3-turbo",
+        // OpenRouter's hosted turbo returns verbose_json segments too (verified 2026-10-12).
+        "openai/whisper-large-v3-turbo"
     ]
 
     private let apiKey: String
@@ -28,14 +30,14 @@ class TranscriptionService {
 
     init(
         apiKey: String,
-        baseURL: String = "https://api.groq.com/openai/v1",
-        transcriptionModel: String = "whisper-large-v3",
+        baseURL: String = ProviderDefaults.apiBaseURL,
+        transcriptionModel: String = ProviderDefaults.transcriptionModel,
         language: String? = nil
     ) throws {
         self.apiKey = apiKey
         self.baseURL = try Self.normalizedBaseURL(from: baseURL)
         let trimmedModel = transcriptionModel.trimmingCharacters(in: .whitespacesAndNewlines)
-        self.transcriptionModel = trimmedModel.isEmpty ? "whisper-large-v3" : trimmedModel
+        self.transcriptionModel = trimmedModel.isEmpty ? ProviderDefaults.transcriptionModel : trimmedModel
         let trimmedLanguage = language?.trimmingCharacters(in: .whitespacesAndNewlines)
         self.language = (trimmedLanguage?.isEmpty == false) ? trimmedLanguage : nil
     }
@@ -46,7 +48,7 @@ class TranscriptionService {
     }
 
     // Validate API key by hitting a lightweight endpoint
-    static func validateAPIKey(_ key: String, baseURL: String = "https://api.groq.com/openai/v1") async -> Bool {
+    static func validateAPIKey(_ key: String, baseURL: String = ProviderDefaults.apiBaseURL) async -> Bool {
         let trimmed = key.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return false }
         guard let baseURL = try? normalizedBaseURL(from: baseURL) else { return false }
