@@ -8,6 +8,7 @@
 # Env:
 #   STT_URL  base URL (default http://127.0.0.1:8178/v1)
 #   STT_KEY  bearer token, if the endpoint needs one (default none)
+#   STT_MODEL model field sent with the request (default whisper-1)
 set -euo pipefail
 
 RUNS="${1:-5}"
@@ -29,7 +30,7 @@ transcribe() {
         auth=(-H "Authorization: Bearer $STT_KEY")
     fi
     curl -sS --fail-with-body "${auth[@]+"${auth[@]}"}" \
-        -F model=whisper-1 -F response_format=json -F "file=@$1" \
+        -F "model=${STT_MODEL:-whisper-1}" -F response_format=json -F "file=@$1" \
         -w '\n%{time_total}' \
         "$STT_URL/audio/transcriptions"
 }
